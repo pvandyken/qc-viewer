@@ -1,0 +1,90 @@
+/* Modal styles */
+.modal {
+  display: block; /* Make the modal visible */
+  position: fixed; /* Position the modal relative to the viewport */
+  z-index: 1; /* Set the z-index to be above everything else */
+  left: 0;
+  top: 0;
+  width: 100%; /* Make the modal span the entire width of the viewport */
+  height: 100%; /* Make the modal span the entire height of the viewport */
+  overflow: auto; /* Allow scrolling if the content is larger than the viewport */
+  background-color: rgba(0, 0, 0, 0.9); /* Set a semi-transparent black background */
+}
+
+.modal img {
+  margin: auto; /* Center the image horizontally */
+  display: block; /* Remove any vertical spacing */
+  max-width: 100%;
+  max-height: 100%;
+  cursor: grab;
+}
+
+.modal img:hover {
+  cursor: zoom-in;
+}
+
+.modal img.zoomed {
+  cursor: grab;
+}
+
+.modal img.zoomed:hover {
+  cursor: grab;
+}
+
+.modal .image-container {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.modal .image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  transition: transform 0.2s ease-out;
+}
+
+.modal .image-container img.zoomed {
+  cursor: grab;
+}
+
+.modal .image-container img.zoomed:hover {
+  cursor: grab;
+}
+
+.modal .image-container.zoomed img {
+  cursor: grab;
+  transform: scale(var(--scale)) translate(var(--tx), var(--ty));
+}
+
+.modal .close {
+  color: white; /* Set the color of the close button to white */
+  font-size: 40px; /* Increase the size of the close button */
+  font-weight: bold;
+  position: absolute; /* Position the close button relative to the modal */
+  top: 10px;
+  right: 20px;
+  cursor: pointer; /* Change the cursor to a hand on hover */
+}
+
+.modal .prev,
+.modal .next {
+  color: white; /* Set the color of the navigation buttons to white */
+  font-size: 50px; /* Increase the size of the navigation buttons */
+  font-weight: bold;
+  position: absolute; /* Position the navigation buttons relative to the modal */
+  top: 50%;
+  margin-top: -30px; /* Center the navigation buttons vertically */
+  cursor: pointer; /* Change the cursor to a hand on hover */
+}
+
+.modal .prev {
+  left: 10px; /* Position the previous button on the left */
+}
+
+.modal .next {
+  right: 10px; /* Position the next button on the right */
+}
+
