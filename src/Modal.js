@@ -1,18 +1,41 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./Modal.css";
-function Modal({ images, onClose, imageIndex }) {
+function Modal({ images, onClose, imageIndex, defaultZoom=0.8 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(imageIndex);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
+  const [zoomLevel, setZoomLevel] = useState(defaultZoom);
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const currentImage = images[currentImageIndex];
+  const imageRef = useRef();
+  const containerRef = useRef();
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    containerRef.current.focus();
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  });
+
+  function startZoom() {
+    setIsZoomed(true);
+  }
+
+  function stopZoom() {
+    setIsZoomed(false);
+    setZoomLevel(defaultZoom);
+    setPanPosition({ x: 0, y: 0 });
+  }
 
   function handleWheel(event) {
     event.preventDefault();
+    if (!isZoomed) {
+      startZoom();
+    }
 
-    const zoomFactor = 0.05;
-    const maxZoom = 3;
-    const minZoom = 1;
+    const zoomFactor = 0.005;
+    const maxZoom = 4;
+    const minZoom = 0.8;
 
     let newZoomLevel = zoomLevel - event.deltaY * zoomFactor;
     newZoomLevel = Math.max(minZoom, Math.min(maxZoom, newZoomLevel));
@@ -24,8 +47,8 @@ function Modal({ images, onClose, imageIndex }) {
     event.preventDefault();
 
     if (!isZoomed) {
-      setIsZoomed(true);
-      event.currentTarget.classList.add("zoomed");
+      startZoom();
+      setZoomLevel(1.5);
       return;
     }
 
@@ -35,59 +58,71 @@ function Modal({ images, onClose, imageIndex }) {
       const dx = event.clientX - startPanPosition.x;
       const dy = event.clientY - startPanPosition.y;
 
-      const imageElement = event.currentTarget;
-      const containerElement = imageElement.parentElement;
+      const imageRect = imageRef.current.getBoundingClientRect();
+      const containerRect = containerRef.current.getBoundingClientRect();
 
-      const imageRect = imageElement.getBoundingClientRect();
-      const containerRect = containerElement.getBoundingClientRect();
-
-      const maxTx = (imageRect.width - containerRect.width) / 2;
-      const maxTy = (imageRect.height - containerRect.height) / 2;
+      const maxTx = (imageRect.width - containerRect.width) / (2 * zoomLevel);
+      const maxTy = (imageRect.height - containerRect.height) / (2 * zoomLevel);
 
       let newTx = panPosition.x + dx;
       let newTy = panPosition.y + dy;
 
-      newTx = Math.max(-maxTx, Math.min(maxTx, newTx));
-      newTy = Math.max(-maxTy, Math.min(maxTy, newTy));
+      newTx = Math.max(-Math.abs(maxTx), Math.min(Math.abs(maxTx), newTx));
+      newTy = Math.max(-Math.abs(maxTy), Math.min(Math.abs(maxTy), newTy));
 
-      imageElement.style.setProperty("--tx", `${newTx}px`);
-      imageElement.style.setProperty("--ty", `${newTy}px`);
+      imageRef.current.style.setProperty("--tx", `${newTx}px`);
+      imageRef.current.style.setProperty("--ty", `${newTy}px`);
 
       setPanPosition({ x: newTx, y: newTy });
-
-      startPanPosition.x = event.clientX;
-      startPanPosition.y = event.clientY;
     }
 
-    function handleMouseUp() {
+    function handleMouseUp(event) {
+      if (
+        event.clientX === startPanPosition.x &&
+        event.clientY === startPanPosition.y
+      ) {
+        stopZoom();
+      }
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
 
-      event.currentTarget.classList.remove("grabbing");
+      // event.currentTarget.classList.remove("grabbing");
     }
 
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
 
-    event.currentTarget.classList.add("grabbing");
+    // event.currentTarget.classList.add("grabbing");
   }
 
   function handleKeyDown(event) {
+    console.log("got key down");
     if (event.key === "Escape") {
       onClose();
     } else if (event.key === "ArrowLeft") {
-      setCurrentImageIndex((currentImageIndex + images.length - 1) % images.length);
-      setIsZoomed(false);
-      setZoomLevel(1);
-      setPanPosition({ x: 0, y: 0 });
+      prevImage();
     } else if (event.key === "ArrowRight") {
-      setCurrentImageIndex((currentImageIndex + 1) % images.length);
-      setIsZoomed(false);
-      setZoomLevel(1);
-      setPanPosition({ x: 0, y: 0 });
+      nextImage();
     }
   }
 
+  const nextImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+    setIsZoomed(false);
+    setZoomLevel(1);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+    setIsZoomed(false);
+    setZoomLevel(1);
+    setPanPosition({ x: 0, y: 0 });
+  };
 
   const imageStyle = isZoomed
     ? {
@@ -98,21 +133,39 @@ function Modal({ images, onClose, imageIndex }) {
     : {};
 
   return (
-    <div className="modal" onKeyDown={handleKeyDown}>
-      <div className="overlay" onClick={onClose}></div>
+    <>
       <div
-        className={`image-container${isZoomed ? " zoomed" : ""}`}
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
+        className="modal"
+        tabIndex="-1"
+        onKeyDown={handleKeyDown}
+        ref={containerRef}
       >
-        <img src={currentImage} alt={currentImage} style={imageStyle} />
+        <div className="overlay" onClick={onClose}></div>
+        <span className="close" onClick={onClose}>
+          &times;
+        </span>
+        <div
+          className={`image-container${isZoomed ? " zoomed" : ""}`}
+          onWheel={handleWheel}
+          onMouseDown={handleMouseDown}
+          style={imageStyle}
+          ref={imageRef}
+        >
+          <img src={currentImage} alt={currentImage} />
+        </div>
+        <span className="prev" onClick={prevImage}>
+          &#10094;
+        </span>
+        <span className="next" onClick={nextImage}>
+          &#10095;
+        </span>
+        {/* <div className="caption">{imageName}</div> */}
       </div>
-      <button className="close-button" onClick={onClose}>
-        X
-      </button>
-      {/* <div className="caption">{imageName}</div> */}
-    </div>
+      <div className="modal-caption">
+        <div className="caption">{currentImage.split("/").pop()}</div>
+      </div>
+    </>
   );
 }
 
-export default Modal
+export default Modal;

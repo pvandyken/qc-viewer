@@ -1,7 +1,11 @@
 .App {
+  font-family: Arial, sans-serif;
+
+}
+
+.gallery {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
 }
 
