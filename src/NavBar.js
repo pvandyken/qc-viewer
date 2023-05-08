@@ -19,7 +19,7 @@ function Navbar({ manifest }) {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" color="inherit">
-          Your Website Name
+          QC Viewer
         </Typography>
         <nav>
           {Object.keys(manifest).map((slug) => (
