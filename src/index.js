@@ -1,23 +1,27 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import {  RouterProvider, createHashRouter } from 'react-router-dom';
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+import {
+  RouterProvider,
+  createBrowserRouter,
+  createHashRouter,
+} from "react-router-dom";
 
-const router = createHashRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <App />,
+    },
+  ],
   {
-    path: "/",
-    element: <App />
-  },
-  {
-    path: "/:page",
-    element: <App />
+    basename: "/qc",
   }
-])
+);
 
 ReactDOM.render(
   <React.StrictMode>
-    <RouterProvider router={router}/>
+    <RouterProvider router={router} />
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
-

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import Modal from "./Modal";
 import Navbar from "./NavBar";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
@@ -15,31 +15,33 @@ function App() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
 
-  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation()
 
   useEffect(() => {
     if (isEmpty(manifest)) {
-      fetch("images.json")
+      fetch("data.json")
         .then((response) => response.json())
-        .then((data) => setManifest(data));
+        .then((data) => setManifest(data))
+        .catch((reason) => {
+          setTitle("qc/data.json not found!")
+        });
     }
   }, [manifest]);
 
   useEffect(() => {
     if (!isEmpty(manifest)) {
-      console.log(location.pathname.split('/').pop())
-      const slug = location.pathname.split("/").pop()
+      const slug = searchParams.get("page")
       if (slug) {
         setPage(slug);
       } else {
         setPage(Object.keys(manifest)[0]);
       }
     }
-  }, [manifest]);
+  }, [manifest, searchParams, location]);
 
   useEffect(() => {
     if (!isEmpty(manifest) && page) {
-      console.log(page)
       if (!(page in manifest)) {
         setTitle("Page not found!");
       } else {
@@ -68,7 +70,7 @@ function App() {
           return (
             <div key={index} onClick={() => openModal(index)}>
               <h2>{name}</h2>
-              <img src={url} alt={name} style={{ width: "100%" }} />
+              <img src={"/" + url} alt={name} style={{ width: "100%" }} />
             </div>
           );
         })}

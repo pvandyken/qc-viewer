@@ -151,7 +151,7 @@ function Modal({ images, onClose, imageIndex, defaultZoom=0.8 }) {
           style={imageStyle}
           ref={imageRef}
         >
-          <img src={currentImage} alt={currentImage} />
+          <img src={"/" + currentImage} alt={currentImage} />
         </div>
         <span className="prev" onClick={prevImage}>
           &#10094;

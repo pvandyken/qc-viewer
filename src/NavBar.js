@@ -25,7 +25,7 @@ function Navbar({ manifest }) {
           {Object.keys(manifest).map((slug) => (
             <Button
               key={slug}
-              href={`/${slug}`}
+              href={`?page=${slug}`}
               color="inherit"
               variant="text"
               className={classes.button}
