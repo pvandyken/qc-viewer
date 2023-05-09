@@ -1,4 +1,6 @@
 name: Deploy website
+permissions:
+  contents: write
 on:
   push:
     # Sequence of patterns matched against refs/tags
@@ -6,15 +8,22 @@ on:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 jobs:
   build:
-    name: Deploying to website
+    name: Deploying
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: RomanosTrechlis/actions-react-build-push@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+      - name: install
+        run: npm install --legacy-peer-deps
+      - name: build
+        run: npm run build
+      - name: rename
+        run: mv build qc
+      - name: get redirect
+        run: mv public/redirect.html index.html
+      - name: package
+        run: tar -czf build.tar.gz qc index.html
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-          build_directory: docs
-          pr_branch: prod
-          package_manager: npm
-          build_command: npm run build
+          files: |
+            build.tar.gz

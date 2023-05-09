@@ -4,7 +4,6 @@ import App from "./App";
 import {
   RouterProvider,
   createBrowserRouter,
-  createHashRouter,
 } from "react-router-dom";
 
 const router = createBrowserRouter(

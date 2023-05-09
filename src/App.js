@@ -15,7 +15,7 @@ function App() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams ] = useSearchParams();
   const location = useLocation()
 
   useEffect(() => {
